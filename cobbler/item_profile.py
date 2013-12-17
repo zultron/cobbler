@@ -116,6 +116,29 @@ class Profile(item.Item):
             parent.children[self.name] = self
         return True
 
+    def get_distro(self):
+        """
+        Retrieve the distro object named by self.distro
+        """
+        if self.distro is None or self.distro == '<<inherit>>':
+            return None
+        d = self.config.distros().find(name=self.distro)
+        return d
+
+    def get_inherited_distro(self):
+        """
+        Retrieve the first distro object found in self or parents
+        """
+        ancestor = self
+        while ancestor is not None:
+            d = ancestor.get_distro()
+            if d is not None:
+                return d
+            if ancestor.COLLECTION_TYPE == "distro":
+                return ancestor
+            ancestor = ancestor.get_parent()
+        return None
+
     def set_distro(self,distro_name):
         """
 	Sets the distro.  This must be the name of an existing

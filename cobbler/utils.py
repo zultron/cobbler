@@ -607,9 +607,14 @@ def grab_tree(api_handle, obj):
     settings = api_handle.settings()
     results = [ obj ]
     parent = obj.get_parent()
+    distro = obj.get_inherited_distro()
     while parent is not None:
-       results.append(parent)
-       parent = parent.get_parent()
+        if not hasattr(parent, 'kernel'):
+            # append only non-distro ancestors
+            results.append(parent)
+        parent = parent.get_parent()
+    # append distro object after other tree objects
+    results.append(distro)
     results.append(settings)  
     return results
 
@@ -635,17 +640,7 @@ def blender(api_handle,remove_hashes, root_obj):
            if not results.has_key(k):
                results["kernel_options"][k] = settings.kernel_options_s390x[k]
 
-    # Get topmost object to determine which breed we're dealing with
-    parent = root_obj.get_parent()
-    if parent is None:
-        parent = root_obj
-
-    while parent.COLLECTION_TYPE is "profile" or parent.COLLECTION_TYPE is "system":
-        parent = parent.get_parent()
-
-    breed = parent.breed
-
-    if breed == "redhat":
+    if root_obj.get_inherited_distro().breed == "redhat":
         # determine if we have room to add kssendmac to the kernel options line
         kernel_txt = hash_to_string(results["kernel_options"])
         if len(kernel_txt) < 244:
@@ -817,13 +812,7 @@ def __consolidate(node,results):
              results[field].extend(data_item)
              results[field] = uniquify(results[field])
           else:
-             # distro field gets special handling, since we don't
-             # want to overwrite it ever.
-             # FIXME: should the parent's field too? It will be over-
-             #        written if there are multiple sub-profiles in
-             #        the chain of inheritance
-             if field != "distro":
-                results[field] = data_item
+              results[field] = data_item
        else:
           results[field] = data_item
 

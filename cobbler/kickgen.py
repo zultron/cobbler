@@ -245,8 +245,7 @@ class KickGen:
         if p is None:
             raise CX(_("system %(system)s references missing profile %(profile)s") % { "system" : s.name, "profile" : s.profile })
 
-        distro = p.get_conceptual_parent()
-        if distro is None: 
+        if p.get_inherited_distro() is None: 
             # this is an image parented system, no kickstart available
             return "# image based systems do not have kickstarts"
 
@@ -282,13 +281,10 @@ class KickGen:
                     self.settings.template_remote_kickstarts)
             if raw_data is None:
                 return "# kickstart is sourced externally: %s" % meta["kickstart"]
-            distro = profile.get_conceptual_parent()
-            if system is not None:
-                distro = system.get_conceptual_parent().get_conceptual_parent()
 
             data = self.templar.render(raw_data, meta, None, obj)
 
-            if distro.breed == "suse":
+            if profile.get_inherited_distro().breed == "suse":
                 # AutoYaST profile
                 data = self.generate_autoyast(profile,system,data)
 
@@ -303,7 +299,7 @@ class KickGen:
         if g is None:
            return "# profile not found"
 
-        distro = g.get_conceptual_parent()
+        distro = g.get_inherited_distro()
         if distro is None:
            raise CX(_("profile %(profile)s references missing distro %(distro)s") % 
                    { "profile" : g.name, "distro" : g.distro })

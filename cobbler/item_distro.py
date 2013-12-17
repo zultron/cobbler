@@ -144,6 +144,13 @@ class Distro(item.Item):
         """
         return None
 
+    def get_inherited_distro(self):
+        """
+        A distro's inherited distro is just itself; this is for
+        consistency
+        """
+        return self
+
     def set_kernel(self,kernel):
         """
         Specifies a kernel.  The kernel parameter is a full path, a filename

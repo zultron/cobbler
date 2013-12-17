@@ -203,6 +203,12 @@ class System(item.Item):
         else:
             return self.config.systems().find(name=self.parent)
 
+    def get_inherited_distro(self):
+        # systems have no 'distro' attribute, so return the parent's distro
+        if self.parent is None:
+            return None
+        return self.get_parent().get_inherited_distro()
+
     def set_name(self,name):
         """
         Set the name.  If the name is a MAC or IP, and the first MAC and/or IP is not defined, go ahead

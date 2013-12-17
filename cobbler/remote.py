@@ -1545,7 +1545,7 @@ class CobblerXMLRPCInterface:
             # Generate a pxelinux.cfg?
             image_based = False
             profile = obj.get_conceptual_parent()
-            distro  = profile.get_conceptual_parent()
+            distro  = profile.get_inherited_distro()
             arch = distro.arch
 
             # the management classes stored in the system are just a list 
