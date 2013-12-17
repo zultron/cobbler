@@ -1676,7 +1676,7 @@ class Koan:
             #        the virtinst VirtualDisk class, but
             #        not all versions of virtinst have a 
             #        nice list to use
-            if t in ('raw', 'qcow', 'qcow2', 'aio', 'vmdk', 'qed'):
+            if t in ('raw', 'qcow', 'qcow2', 'aio', 'vmdk', 'qed', 'rbd'):
                accum.append(t)
             else:
                print "invalid disk driver specified, defaulting to 'raw'"
@@ -1802,12 +1802,15 @@ class Koan:
         #   file Ex:         /foo
         #   partition Ex:    /dev/foo
         #   volume-group Ex: vg-name(:lv-name)
+        #   rbd volume Ex:   rbd:/virt-pool/foo.img
         #
         # chosing the disk image name (if applicable) is somewhat
         # complicated ...
 
         # use default location for the virt type
 
+        driverstr = self.safe_load(pd,'virt_disk_driver',default='raw')
+        drivers = driverstr.split(',')
         if not location.startswith("/dev/") and location.startswith("/"):
             # filesystem path
             if os.path.isdir(location):
@@ -1825,6 +1828,9 @@ class Koan:
                 return location
             else:
                 raise InfoException, "virt path is not a valid block device"
+        elif drivers[offset] == 'rbd':
+            # RBD volume
+            return location
         else:
             # it's a volume group, verify that it exists
             if location.find(':') == -1:

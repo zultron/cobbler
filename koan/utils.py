@@ -52,7 +52,7 @@ VIRT_STATE_NAME_MAP = {
    6 : "crashed"
 }
 
-VALID_DRIVER_TYPES = ['raw', 'qcow', 'qcow2', 'vmdk', 'qed']
+VALID_DRIVER_TYPES = ['raw', 'qcow', 'qcow2', 'vmdk', 'qed', 'rbd']
 
 class InfoException(exceptions.Exception):
     """
@@ -575,6 +575,10 @@ def create_qemu_image_file(path, size, driver_type):
     if driver_type not in VALID_DRIVER_TYPES:
         raise InfoException, "Invalid QEMU image type: %s" % driver_type
    
+    # rbd-enabled qemu-img wants path to begin with 'rbd:'
+    if driver_type == 'rbd':
+        path = 'rbd:' + path
+
     cmd = ["qemu-img", "create", "-f", driver_type, path, "%sG" % size]
     try:
         subprocess_call(cmd)

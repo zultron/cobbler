@@ -385,13 +385,17 @@ def build_commandline(uri,
     for path, size, driver_type in disks:
         print ("- adding disk: %s of size %s (driver type=%s)" %
                (path, size, driver_type))
-        cmd += "--disk path=%s" % (path)
-        if str(size) != "0":
-            cmd += ",size=%s" % size
+        if driver_type == 'rbd':
+            # virt-manager wants 'vol' for managed/existing disks
+            cmd += "--disk vol=%s" % (path)
+        else:
+            cmd += "--disk path=%s" % (path)
+            if str(size) != "0":
+                cmd += ",size=%s" % size
+            if driver_type and not disable_driver_type:
+                cmd += ",format=%s" % driver_type
         if disk_bus:
             cmd += ",bus=%s" % disk_bus
-        if driver_type and not disable_driver_type:
-            cmd += ",format=%s" % driver_type
         cmd += " "
 
     if floppy:
