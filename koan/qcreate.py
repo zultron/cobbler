@@ -28,5 +28,6 @@ import virtinstall
 
 def start_install(*args, **kwargs):
     virtinstall.create_image_file(*args, **kwargs)
+    virtinstall.refresh_storage_pool(*args, **kwargs)
     cmd = virtinstall.build_commandline("qemu:///system", *args, **kwargs)
     utils.subprocess_call(cmd)

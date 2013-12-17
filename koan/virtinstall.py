@@ -145,6 +145,10 @@ def create_image_file(disks=None, **kwargs):
             continue
         utils.create_qemu_image_file(path, size, driver_type)
 
+def refresh_storage_pool(disks=None, **kwargs):
+    disks = _sanitize_disks(disks)
+    utils.storage_pool_refresh(disks)
+
 def build_commandline(uri,
                       name=None,
                       ram=None,

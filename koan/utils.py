@@ -582,3 +582,33 @@ def create_qemu_image_file(path, size, driver_type):
         traceback.print_exc()
         raise InfoException, "Image file create failed: %s" % string.join(cmd, " ")
 
+def storage_pool_refresh(disks):
+    # get list of any pools
+    pools = []
+    p = sub_process.Popen(["virsh", "-q", "pool-list"],
+                          stdout=sub_process.PIPE)
+    (stdout, stderr) = p.communicate()
+    if p.wait() != 0:
+        return
+    for l in stdout.splitlines():
+        f = l.split()
+        if f[1] == 'active':
+            pools.append(f[0])
+    if not pools:
+        return
+
+    # refresh matching pools
+    for pool in pools:
+        # if any disk matches, refresh
+        for disk in disks:
+            if disk[0].startswith( pool+'/' ):
+                print "- refreshing pool %s" % pool
+                cmd = ["virsh", "pool-refresh", pool]
+                try:
+                    subprocess_call(cmd)
+                except:
+                    traceback.print_exc()
+                    raise InfoException, \
+                        "Refreshing storage pool failed: %s" % \
+                        string.join(cmd, " ")
+                break
